@@ -67,7 +67,7 @@ body {
   width: 400px;
   height: 445px;
   background: #fff;
-  border-top: 4px solid #FF2625;
+  border-top: 4px solid #ff2625;
   border-bottom-left-radius: 20px;
   text-decoration: none;
   display: flex;
@@ -78,8 +78,13 @@ body {
   transition: 0.3s all ease-in-out;
 }
 
+/* This is now safe with the new code */
 .exercise-card img {
-  height: 326px;
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
 }
 
 .bodyPart-card {

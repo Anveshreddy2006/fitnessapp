@@ -2,10 +2,10 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 import { Box } from "@mui/material";
 
-import ExerciseDetail from "./pages/ExerciseDetail"; // or "./Pages/ExerciseDetail" if your folder is "Pages"
-import Home from "./pages/Home";
+import ExerciseDetail from "./Pages/ExerciseDetail"; // or "./Pages/ExerciseDetail" if your folder is "Pages"
+import Home from "./Pages/Home";
 import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
+import Footer from "./components/footer";
 
 import "./App.css";
 
