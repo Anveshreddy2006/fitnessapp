@@ -1,24 +1,27 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button, Stack, Typography } from "@mui/material";
+import exerciseVideosMap from "../data/exerciseVideos";
+
 const ExerciseCard = ({ exercise }) => {
-  // Build GIF URL from the exercise ID
-  const gifUrl = `https://d205bpvrqc9yn1.cloudfront.net/${exercise.id}.gif`;
+  const videos = exerciseVideosMap[exercise.name] || [];
+  const mappedUrl = videos[0]?.url;
+
+  const fallbackUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(
+    exercise.name + " exercise"
+  )}&sp=EgIoAQ%253D%253D`;
+
+  const firstVideoUrl = mappedUrl || fallbackUrl;
+
+  const handleWatchClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    window.open(firstVideoUrl, "_blank");
+  };
 
   return (
     <Link className="exercise-card" to={`/exercise/${exercise.id}`}>
-      <img
-        src={gifUrl}
-        alt={exercise.name}
-        loading="lazy"
-        style={{
-          width: "100%",
-          height: "250px",
-          objectFit: "cover",
-          borderRadius: "10px",
-          display: "block",
-        }}
-      />
+      <img src={exercise.gifUrl} alt={exercise.name} loading="lazy" />
 
       <Stack direction="row">
         <Button
@@ -52,13 +55,25 @@ const ExerciseCard = ({ exercise }) => {
         ml="21px"
         color="#000"
         fontWeight="bold"
-        sx={{ fontSize: { lg: "24px", xs: "20px" } }}
-        mt="11px"
-        pb="10px"
         textTransform="capitalize"
+        fontSize="22px"
+        mt="11px"
       >
         {exercise.name}
       </Typography>
+
+      <Button
+        sx={{
+          ml: "21px",
+          mt: "4px",
+          mb: "10px",
+          textTransform: "none",
+          fontSize: "14px",
+        }}
+        onClick={handleWatchClick}
+      >
+        Watch on YouTube
+      </Button>
     </Link>
   );
 };

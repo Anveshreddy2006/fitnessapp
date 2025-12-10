@@ -1,75 +1,89 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Box, Stack, Typography } from "@mui/material";
-import { exerciseOptions, fetchData } from "../utils/fetchData";
+import { Box } from "@mui/material";
+
+import { fetchData, normalizeExercises } from "../utils/fetchData";
+import Detail from "../components/Detail";
+import ExerciseVideos from "../components/ExerciseVideos";
+import SimilarExercises from "../components/SimilarExercises";
+import Loader from "../components/Loader";
+import exerciseVideosMap from "../data/exerciseVideos";
 
 const ExerciseDetail = () => {
   const [exerciseDetail, setExerciseDetail] = useState(null);
+  const [exerciseVideos, setExerciseVideos] = useState([]);
+  const [targetMuscleExercises, setTargetMuscleExercises] = useState([]);
+  const [equipmentExercises, setEquipmentExercises] = useState([]);
+
   const { id } = useParams();
 
   useEffect(() => {
-    const fetchExerciseData = async () => {
-      const data = await fetchData(
-        `https://exercisedb.p.rapidapi.com/exercises/exercise/${id}`,
-        exerciseOptions
-      );
-      setExerciseDetail(data);
+    const fetchExercisesData = async () => {
+      try {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+
+        const raw = await fetchData(
+          "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json"
+        );
+        const allExercises = normalizeExercises(raw);
+
+        const current = allExercises.find((item) => item.id === id);
+
+        if (!current) {
+          console.error("Exercise not found for id:", id);
+          return;
+        }
+
+        setExerciseDetail(current);
+
+        const localVideos = exerciseVideosMap[current.name] || [];
+        setExerciseVideos(localVideos);
+
+        const sameTarget = allExercises.filter(
+          (item) => item.id !== current.id && item.target === current.target
+        );
+
+        const sameEquipment = allExercises.filter(
+          (item) =>
+            item.id !== current.id && item.equipment === current.equipment
+        );
+
+        setTargetMuscleExercises(sameTarget);
+        setEquipmentExercises(sameEquipment);
+
+        // no YouTube API for now – keep videos empty
+        setExerciseVideos([]);
+      } catch (err) {
+        console.error("Failed to load exercise detail:", err);
+      }
     };
 
-    fetchExerciseData();
+    fetchExercisesData();
   }, [id]);
 
-  if (!exerciseDetail) return <div>Loading...</div>;
-
-  // Use the same CloudFront GIF pattern
-
-  const gifUrl = `https://d205bpvrqc9yn1.cloudfront.net/${id}.gif`;
+  if (!exerciseDetail) {
+    return (
+      <Box p="20px">
+        <Loader />
+      </Box>
+    );
+  }
 
   return (
-    <Box sx={{ mt: { lg: "80px", xs: "20px" }, p: "20px" }}>
-      <Stack direction={{ lg: "row", xs: "column" }} gap="40px">
-        <img
-          src={gifUrl}
-          alt={exerciseDetail.name}
-          loading="lazy"
-          style={{
-            borderRadius: "20px",
-            width: "100%",
-            maxWidth: "400px",
-            height: "auto",
-            display: "block",
-          }}
+    <Box>
+      <Detail exerciseDetail={exerciseDetail} />
+
+      {exerciseVideos.length > 0 && (
+        <ExerciseVideos
+          exerciseVideos={exerciseVideos}
+          name={exerciseDetail.name}
         />
+      )}
 
-        <Stack gap="20px">
-          <Typography
-            fontWeight={700}
-            fontSize="40px"
-            textTransform="capitalize"
-          >
-            {exerciseDetail.name}
-          </Typography>
-
-          <Typography fontSize="18px" color="#555">
-            {exerciseDetail.description}
-          </Typography>
-
-          <Typography fontSize="22px" fontWeight="600">
-            Target Muscle:{" "}
-            <span style={{ color: "#ff2625" }}>{exerciseDetail.target}</span>
-          </Typography>
-
-          <Typography fontSize="22px" fontWeight="600">
-            Body Part:{" "}
-            <span style={{ color: "#ff2625" }}>{exerciseDetail.bodyPart}</span>
-          </Typography>
-
-          <Typography fontSize="22px" fontWeight="600">
-            Equipment:{" "}
-            <span style={{ color: "#ff2625" }}>{exerciseDetail.equipment}</span>
-          </Typography>
-        </Stack>
-      </Stack>
+      <SimilarExercises
+        targetMuscleExercises={targetMuscleExercises}
+        equipmentExercises={equipmentExercises}
+      />
     </Box>
   );
 };

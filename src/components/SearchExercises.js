@@ -1,46 +1,55 @@
 import React, { useEffect, useState } from "react";
 import { Box, Button, Stack, TextField, Typography } from "@mui/material";
 
-import { exerciseOptions, fetchData } from "../utils/fetchData";
+import { fetchData, normalizeExercises } from "../utils/fetchData";
 import HorizontalScrollbar from "./HorizontalScrollbar";
 
 const SearchExercises = ({ setExercises, bodyPart, setBodyPart }) => {
   const [search, setSearch] = useState("");
   const [bodyParts, setBodyParts] = useState([]);
+  const [allExercises, setAllExercises] = useState([]);
 
   useEffect(() => {
     const fetchExercisesData = async () => {
-      const bodyPartsData = await fetchData(
-        "https://exercisedb.p.rapidapi.com/exercises/bodyPartList",
-        exerciseOptions
-      );
+      try {
+        const raw = await fetchData(
+          "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json"
+        );
+        const normalized = normalizeExercises(raw);
 
-      setBodyParts(["all", ...bodyPartsData]);
+        setAllExercises(normalized);
+
+        const bodyPartsArray = [
+          "all",
+          ...new Set(normalized.map((item) => item.bodyPart).filter(Boolean)),
+        ];
+
+        setBodyParts(bodyPartsArray);
+      } catch (error) {
+        console.error("Failed to load body parts:", error);
+      }
     };
 
     fetchExercisesData();
   }, []);
 
-  const handleSearch = async () => {
-    if (search) {
-      const exercisesData = await fetchData(
-        "https://exercisedb.p.rapidapi.com/exercises?type=gif",
-        exerciseOptions
-      );
+  const handleSearch = () => {
+    if (!search) return;
 
-      const searchedExercises = exercisesData.filter(
-        (item) =>
-          item.name.toLowerCase().includes(search) ||
-          item.target.toLowerCase().includes(search) ||
-          item.equipment.toLowerCase().includes(search) ||
-          item.bodyPart.toLowerCase().includes(search)
-      );
+    const s = search.toLowerCase();
 
-      window.scrollTo({ top: 1800, left: 100, behavior: "smooth" });
+    const searchedExercises = allExercises.filter(
+      (item) =>
+        item.name?.toLowerCase().includes(s) ||
+        item.target?.toLowerCase().includes(s) ||
+        item.equipment?.toLowerCase().includes(s) ||
+        item.bodyPart?.toLowerCase().includes(s)
+    );
 
-      setSearch("");
-      setExercises(searchedExercises);
-    }
+    window.scrollTo({ top: 1800, left: 100, behavior: "smooth" });
+
+    setSearch("");
+    setExercises(searchedExercises);
   };
 
   return (
@@ -53,6 +62,7 @@ const SearchExercises = ({ setExercises, bodyPart, setBodyPart }) => {
       >
         Awesome Exercises You <br /> Should Know
       </Typography>
+
       <Box position="relative" mb="72px">
         <TextField
           height="76px"
@@ -84,12 +94,13 @@ const SearchExercises = ({ setExercises, bodyPart, setBodyPart }) => {
           Search
         </Button>
       </Box>
+
       <Box sx={{ position: "relative", width: "100%", p: "20px" }}>
         <HorizontalScrollbar
           data={bodyParts}
-          bodyParts
           setBodyPart={setBodyPart}
           bodyPart={bodyPart}
+          bodyParts
         />
       </Box>
     </Stack>

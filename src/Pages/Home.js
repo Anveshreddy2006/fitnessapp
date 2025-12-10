@@ -10,13 +10,15 @@ const Home = () => {
   const [bodyPart, setBodyPart] = useState("all");
 
   return (
-    <Box>
+    <Box sx={{ mt: { lg: "40px", xs: "20px" } }}>
       <HeroBanner />
+
       <SearchExercises
         setExercises={setExercises}
         bodyPart={bodyPart}
         setBodyPart={setBodyPart}
       />
+
       <Exercises
         setExercises={setExercises}
         exercises={exercises}

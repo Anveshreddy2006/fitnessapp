@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import Pagination from "@mui/material/Pagination";
 import { Box, Stack, Typography } from "@mui/material";
+import { fetchData, normalizeExercises } from "../utils/fetchData";
 
-import { exerciseOptions, fetchData } from "../utils/fetchData";
 import ExerciseCard from "./ExerciseCard";
 import Loader from "./Loader";
 
@@ -12,25 +12,30 @@ const Exercises = ({ exercises, setExercises, bodyPart }) => {
 
   useEffect(() => {
     const fetchExercisesData = async () => {
-      let exercisesData = [];
+      try {
+        const raw = await fetchData(
+          "https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/dist/exercises.json"
+        );
+        const allExercises = normalizeExercises(raw);
 
-      if (bodyPart === "all") {
-        exercisesData = await fetchData(
-          "https://exercisedb.p.rapidapi.com/exercises",
-          exerciseOptions
-        );
-      } else {
-        exercisesData = await fetchData(
-          `https://exercisedb.p.rapidapi.com/exercises/bodyPart/${bodyPart}`,
-          exerciseOptions
-        );
+        let filtered = allExercises;
+        if (bodyPart !== "all") {
+          filtered = allExercises.filter(
+            (exercise) =>
+              exercise.bodyPart &&
+              exercise.bodyPart.toLowerCase() === bodyPart.toLowerCase()
+          );
+        }
+
+        setExercises(filtered);
+        setCurrentPage(1);
+      } catch (error) {
+        console.error("Failed to load exercises:", error);
       }
-
-      setExercises(exercisesData);
     };
 
     fetchExercisesData();
-  }, [bodyPart]);
+  }, [bodyPart, setExercises]);
 
   // Pagination
   const indexOfLastExercise = currentPage * exercisesPerPage;
@@ -39,11 +44,9 @@ const Exercises = ({ exercises, setExercises, bodyPart }) => {
     indexOfFirstExercise,
     indexOfLastExercise
   );
-  console.log(currentExercises[0]);
 
   const paginate = (event, value) => {
     setCurrentPage(value);
-
     window.scrollTo({ top: 1800, behavior: "smooth" });
   };
 
@@ -65,12 +68,12 @@ const Exercises = ({ exercises, setExercises, bodyPart }) => {
         flexWrap="wrap"
         justifyContent="center"
       >
-        {currentExercises.map((exercise, idx) => (
-          <ExerciseCard key={idx} exercise={exercise} />
+        {currentExercises.map((exercise) => (
+          <ExerciseCard key={exercise.id} exercise={exercise} />
         ))}
       </Stack>
       <Stack sx={{ mt: { lg: "114px", xs: "70px" } }} alignItems="center">
-        {exercises.length > 9 && (
+        {exercises.length > exercisesPerPage && (
           <Pagination
             color="standard"
             shape="rounded"
