@@ -2,8 +2,9 @@ body {
   font-family: 'Josefin Sans', system-ui, -apple-system, BlinkMacSystemFont,
     'Segoe UI', sans-serif;
   background-color: #fffafb;
+  
+   transition: background-color 200ms ease, color 200ms ease;
 }
-
 * {
   padding: 0;
   margin: 0;
@@ -73,7 +74,7 @@ body {
   margin-top: -330px;
   object-fit: cover;
   pointer-events: none;
-  z-index: -1;          /* 🔥 put image behind navbar + text */
+  z-index: -1;         
 }
 
 
@@ -91,7 +92,12 @@ body {
   flex-direction: column;
   padding-bottom: 10px;
   transform: scale(1, 1);
-  transition: 0.3s all ease-in-out;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.exercise-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
 }
 
 .exercise-card img {

@@ -1,10 +1,15 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Stack } from "@mui/material";
+import { Stack, IconButton, Tooltip, useTheme } from "@mui/material";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
 
 import Logo from "../assets/images/Logo.png";
+import { ColorModeContext } from "../App";
 
 const Navbar = () => {
+  const theme = useTheme();
+  const colorMode = useContext(ColorModeContext);
   const navigate = useNavigate();
 
   const handleHomeClick = (e) => {
@@ -23,22 +28,30 @@ const Navbar = () => {
         mt: { sm: "32px", xs: "20px" },
       }}
     >
+      {/* Logo */}
       <Link to="/" onClick={handleHomeClick}>
         <img
           src={Logo}
           alt="logo"
-          style={{ width: "48px", height: "48px", margin: "0 20px 0 0" }}
+          style={{
+            width: "48px",
+            height: "48px",
+            marginRight: "20px",
+            cursor: "pointer",
+          }}
         />
       </Link>
 
-      <Stack direction="row" gap="40px" fontFamily="Alegreya" fontSize="24px">
+      {/* Links + Theme Toggle */}
+      <Stack direction="row" gap="24px" alignItems="center" fontSize="24px">
         <Link
           to="/"
           onClick={handleHomeClick}
           style={{
             textDecoration: "none",
-            color: "#3A1212",
-            borderBottom: "3px solid #FF2625",
+            color: theme.palette.text.primary,
+            borderBottom: "3px solid",
+            borderColor: theme.palette.primary.main,
           }}
         >
           Home
@@ -46,10 +59,32 @@ const Navbar = () => {
 
         <a
           href="#exercises"
-          style={{ textDecoration: "none", color: "#3A1212" }}
+          style={{
+            textDecoration: "none",
+            color: theme.palette.text.primary,
+          }}
         >
           Exercises
         </a>
+
+        {/* 🌙 Dark / Light Toggle — NOW BESIDE EXERCISES */}
+        <Tooltip title="Toggle light / dark theme">
+          <IconButton
+            onClick={colorMode.toggleColorMode}
+            sx={{
+              border: "1px solid",
+              borderColor: "divider",
+              borderRadius: "10px",
+              ml: 1,
+            }}
+          >
+            {theme.palette.mode === "dark" ? (
+              <LightModeIcon />
+            ) : (
+              <DarkModeIcon />
+            )}
+          </IconButton>
+        </Tooltip>
       </Stack>
     </Stack>
   );

@@ -1,9 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Button, Stack, Typography } from "@mui/material";
+import { Box, Button, Stack, Typography, useTheme } from "@mui/material";
 import exerciseVideosMap from "../data/exerciseVideos";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 
 const ExerciseCard = ({ exercise }) => {
+  const theme = useTheme();
+
   const videos = exerciseVideosMap[exercise.name] || [];
   const mappedUrl = videos[0]?.url;
 
@@ -19,61 +22,138 @@ const ExerciseCard = ({ exercise }) => {
     window.open(firstVideoUrl, "_blank");
   };
 
+  // theme-aware shadows
+  const cardShadow =
+    theme.palette.mode === "dark"
+      ? "0 6px 18px rgba(0,0,0,0.6)"
+      : "0 6px 20px rgba(20,20,20,0.06)";
+
+  const cardHoverShadow =
+    theme.palette.mode === "dark"
+      ? "0 12px 36px rgba(0,0,0,0.75)"
+      : "0 14px 40px rgba(20,20,20,0.12)";
+
   return (
-    <Link className="exercise-card" to={`/exercise/${exercise.id}`}>
-      <img src={exercise.gifUrl} alt={exercise.name} loading="lazy" />
-
-      <Stack direction="row">
-        <Button
-          sx={{
-            ml: "21px",
-            color: "#715757ff",
-            background: "#FFA9A9",
-            fontSize: "14px",
-            borderRadius: "20px",
-            textTransform: "capitalize",
-          }}
-        >
-          {exercise.bodyPart}
-        </Button>
-
-        <Button
-          sx={{
-            ml: "21px",
-            color: "#fff",
-            background: "#FCC757",
-            fontSize: "14px",
-            borderRadius: "20px",
-            textTransform: "capitalize",
-          }}
-        >
-          {exercise.target}
-        </Button>
-      </Stack>
-
-      <Typography
-        ml="21px"
-        color="#000"
-        fontWeight="bold"
-        textTransform="capitalize"
-        fontSize="22px"
-        mt="11px"
-      >
-        {exercise.name}
-      </Typography>
-
-      <Button
+    <Link
+      to={`/exercise/${exercise.id}`}
+      style={{ textDecoration: "none", display: "block" }}
+      aria-label={`Open details for ${exercise.name}`}
+    >
+      <Box
+        className="exercise-card"
         sx={{
-          ml: "21px",
-          mt: "4px",
-          mb: "10px",
-          textTransform: "none",
-          fontSize: "14px",
+          bgcolor: "background.paper",
+          color: "text.primary",
+          borderRadius: 2,
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+
+          /* combined transition for transform + box-shadow */
+          transition:
+            "transform 0.28s ease-in-out, box-shadow 0.28s ease-in-out",
+
+          /* default shadow */
+          boxShadow: cardShadow,
+
+          "&:hover": {
+            transform: "translateY(-6px) scale(1.01)",
+            boxShadow: cardHoverShadow,
+          },
+
+          /* keep focus visible for keyboard users */
+          "&:focus-within": {
+            transform: "translateY(-4px) scale(1.008)",
+            boxShadow: cardHoverShadow,
+          },
         }}
-        onClick={handleWatchClick}
       >
-        Watch on YouTube
-      </Button>
+        <Box
+          component="img"
+          src={exercise.gifUrl}
+          alt={exercise.name}
+          loading="lazy"
+          sx={{
+            width: "100%",
+            height: { xs: 220, sm: 260, md: 326 },
+            objectFit: "cover",
+            display: "block",
+            backgroundColor: theme.palette.action.hover, // placeholder color while image loads
+          }}
+        />
+
+        <Box sx={{ p: 2 }}>
+          <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+            <Button
+              size="small"
+              sx={{
+                px: 2,
+                color: theme.palette.mode === "dark" ? "#3a1c1c" : "#715757",
+                bgcolor:
+                  theme.palette.mode === "dark"
+                    ? "rgba(255,207,207,0.12)"
+                    : "#FFA9A9",
+                fontSize: "13px",
+                borderRadius: "20px",
+                textTransform: "capitalize",
+                "&:hover": {
+                  opacity: 0.94,
+                },
+              }}
+            >
+              {exercise.bodyPart}
+            </Button>
+
+            <Button
+              size="small"
+              sx={{
+                px: 2,
+                color: theme.palette.getContrastText("#FCC757"),
+                bgcolor: "#FCC757",
+                fontSize: "13px",
+                borderRadius: "20px",
+                textTransform: "capitalize",
+                "&:hover": {
+                  opacity: 0.95,
+                },
+              }}
+            >
+              {exercise.target}
+            </Button>
+          </Stack>
+
+          <Typography
+            color="text.primary"
+            fontWeight="bold"
+            textTransform="capitalize"
+            fontSize={{ xs: "18px", md: "20px" }}
+            sx={{ mb: 1 }}
+          >
+            {exercise.name}
+          </Typography>
+
+          <Button
+            variant="outlined"
+            size="small"
+            startIcon={<PlayArrowIcon />}
+            onClick={handleWatchClick}
+            sx={{
+              textTransform: "none",
+              fontSize: "14px",
+              borderRadius: 1,
+              color: "text.primary",
+              borderColor: theme.palette.divider,
+              "&:focus": {
+                outline: `2px solid ${theme.palette.primary.main}`,
+                outlineOffset: 2,
+              },
+            }}
+          >
+            Watch on YouTube
+          </Button>
+        </Box>
+      </Box>
     </Link>
   );
 };
