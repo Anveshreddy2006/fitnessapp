@@ -1,15 +1,18 @@
 import React, { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Stack, IconButton, Tooltip, useTheme } from "@mui/material";
+import { Stack, IconButton, Tooltip, Button, useTheme } from "@mui/material";
 import LightModeIcon from "@mui/icons-material/LightMode";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 
 import Logo from "../assets/images/Logo.png";
 import { ColorModeContext } from "../App";
+import { AuthContext } from "../auth/AuthContext";
+import StreakBadge from "./StreakBadge";
 
 const Navbar = () => {
   const theme = useTheme();
   const colorMode = useContext(ColorModeContext);
+  const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleHomeClick = (e) => {
@@ -20,15 +23,15 @@ const Navbar = () => {
 
   return (
     <Stack
-      direction="row"
-      alignItems="center"
+      direction={{ xs: "column", sm: "row" }}
+      alignItems={{ xs: "flex-start", sm: "center" }}
       px="20px"
       sx={{
-        gap: { sm: "40px", xs: "20px" },
-        mt: { sm: "32px", xs: "20px" },
+        gap: { xs: "12px", sm: "40px" },
+        mt: { sm: "32px", xs: "16px" },
       }}
     >
-      {/* Logo */}
+      {/* LOGO */}
       <Link to="/" onClick={handleHomeClick}>
         <img
           src={Logo}
@@ -42,8 +45,8 @@ const Navbar = () => {
         />
       </Link>
 
-      {/* Links + Theme Toggle */}
-      <Stack direction="row" gap="24px" alignItems="center" fontSize="24px">
+      {/* NAV LINKS */}
+      <Stack direction="row" gap="24px" alignItems="center" fontSize="22px">
         <Link
           to="/"
           onClick={handleHomeClick}
@@ -67,7 +70,7 @@ const Navbar = () => {
           Exercises
         </a>
 
-        {/* 🌙 Dark / Light Toggle — NOW BESIDE EXERCISES */}
+        {/* 🌙 THEME TOGGLE (BESIDE EXERCISES) */}
         <Tooltip title="Toggle light / dark theme">
           <IconButton
             onClick={colorMode.toggleColorMode}
@@ -75,7 +78,6 @@ const Navbar = () => {
               border: "1px solid",
               borderColor: "divider",
               borderRadius: "10px",
-              ml: 1,
             }}
           >
             {theme.palette.mode === "dark" ? (
@@ -85,6 +87,26 @@ const Navbar = () => {
             )}
           </IconButton>
         </Tooltip>
+      </Stack>
+
+      {/* RIGHT SIDE (STREAK + LOGIN) */}
+      <Stack
+        direction="row"
+        spacing={2}
+        alignItems="center"
+        sx={{ marginLeft: "auto" }}
+      >
+        {user && <StreakBadge />}
+
+        {!user ? (
+          <Button variant="outlined" onClick={() => navigate("/login")}>
+            Login
+          </Button>
+        ) : (
+          <Button variant="outlined" onClick={logout}>
+            Logout
+          </Button>
+        )}
       </Stack>
     </Stack>
   );

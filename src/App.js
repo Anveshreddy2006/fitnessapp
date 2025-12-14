@@ -10,14 +10,15 @@ import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 
 import "./App.css";
+import Login from "./auth/Login";
+import { AuthContext } from "./auth/AuthContext";
+import { useContext } from "react";
 
-// Create a Context so components (Navbar) can toggle mode
 export const ColorModeContext = React.createContext({
   toggleColorMode: () => {},
 });
 
 const App = () => {
-  // read persisted mode or default to light
   const stored =
     typeof window !== "undefined" ? localStorage.getItem("mode") : null;
   const initialMode = stored === "dark" ? "dark" : "light";
@@ -89,6 +90,7 @@ const App = () => {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/exercise/:id" element={<ExerciseDetail />} />
+            <Route path="/login" element={<Login />} />
           </Routes>
           <Footer />
         </Box>
