@@ -68,6 +68,20 @@ const Home = () => {
     setProtein(Math.round(weight * 2));
     setCalories(Math.round(weight * 35));
   };
+  const handleDownload = (text, filename) => {
+    if (!text) return;
+
+    const blob = new Blob([text], {
+      type: "text/plain;charset=utf-8",
+    });
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   // Diet
   const handleGenerateDiet = async () => {
@@ -285,6 +299,29 @@ Include exercises, sets, reps, rest & recovery day.
                 <Button onClick={() => navigator.clipboard.writeText(o.value)}>
                   Copy
                 </Button>
+
+                {o.title === "Weekly Diet Plan" && (
+                  <Button
+                    onClick={() =>
+                      handleDownload(dietPlan, "weekly-diet-plan.txt")
+                    }
+                    sx={{ color: "green", fontWeight: "bold" }}
+                  >
+                    Download Diet
+                  </Button>
+                )}
+
+                {o.title === "Weekly Workout Plan" && (
+                  <Button
+                    onClick={() =>
+                      handleDownload(workoutPlan, "weekly-workout-plan.txt")
+                    }
+                    sx={{ color: "green", fontWeight: "bold" }}
+                  >
+                    Download Workout
+                  </Button>
+                )}
+
                 <Button onClick={() => o.set("")}>Close</Button>
               </Stack>
             </Paper>
